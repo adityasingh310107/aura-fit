@@ -43,17 +43,72 @@
             overflow-x: hidden;
         }
 
+        /* ── NOISE OVERLAY ── */
         body::after {
             content:''; position:fixed; inset:0; z-index:0;
             background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-            pointer-events:none; opacity:0.5;
+            pointer-events:none; opacity:0.4;
         }
 
-        .embers { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
-        .ember { position:absolute; border-radius:50%; filter:blur(90px); opacity:0.12; animation:ember-drift 25s ease-in-out infinite alternate; }
-        .e1 { width:600px; height:600px; background:radial-gradient(circle,#c0392b,#8b1a0e); top:-200px; left:-150px; animation-duration:30s; }
-        .e2 { width:400px; height:400px; background:radial-gradient(circle,#f39c12,#c0392b); bottom:5%; right:-100px; animation-duration:22s; animation-delay:-8s; }
-        .e3 { width:300px; height:300px; background:radial-gradient(circle,#d4a843,transparent); top:40%; left:35%; animation-duration:18s; animation-delay:-14s; opacity:0.08; }
+        /* ── AURORA LAYER ── */
+        .aurora { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+        .aurora-band {
+            position:absolute; border-radius:50%;
+            filter:blur(120px);
+            mix-blend-mode:screen;
+            animation:aurora-float linear infinite alternate;
+        }
+        .ab1 { width:800px; height:800px; background:radial-gradient(circle at 40% 40%,rgba(192,57,43,0.18),rgba(139,26,14,0.08),transparent 70%); top:-250px; left:-200px; animation-duration:35s; opacity:1; }
+        .ab2 { width:700px; height:700px; background:radial-gradient(circle at 50% 50%,rgba(243,156,18,0.12),rgba(192,57,43,0.06),transparent 70%); bottom:-150px; right:-180px; animation-duration:28s; animation-delay:-10s; opacity:1; }
+        .ab3 { width:500px; height:500px; background:radial-gradient(circle at 50% 50%,rgba(212,168,67,0.1),transparent 70%); top:35%; left:30%; animation-duration:22s; animation-delay:-18s; opacity:1; }
+        .ab4 { width:350px; height:350px; background:radial-gradient(circle at 50% 50%,rgba(192,57,43,0.09),transparent 70%); top:60%; left:60%; animation-duration:19s; animation-delay:-6s; opacity:1; }
+        .ab5 { width:280px; height:280px; background:radial-gradient(circle at 50% 50%,rgba(231,76,60,0.11),transparent 70%); top:10%; right:15%; animation-duration:24s; animation-delay:-3s; opacity:1; }
+        @keyframes aurora-float {
+            0%   { transform:translate(0px, 0px) scale(1) rotate(0deg); }
+            25%  { transform:translate(20px,-30px) scale(1.05) rotate(3deg); }
+            50%  { transform:translate(-15px,20px) scale(0.97) rotate(-2deg); }
+            75%  { transform:translate(25px,15px) scale(1.08) rotate(4deg); }
+            100% { transform:translate(-10px,-25px) scale(1.02) rotate(-1deg); }
+        }
+
+        /* ── CANVAS PARTICLE BED ── */
+        #particle-canvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+        /* ── CURSOR GLOW ── */
+        #cursor-glow {
+            position:fixed; pointer-events:none; z-index:9999;
+            width:380px; height:380px;
+            border-radius:50%;
+            background:radial-gradient(circle, rgba(192,57,43,0.08) 0%, transparent 70%);
+            transform:translate(-50%,-50%);
+            transition:opacity 0.4s ease;
+            opacity:0;
+        }
+        #cursor-dot {
+            position:fixed; pointer-events:none; z-index:9999;
+            width:6px; height:6px; border-radius:50%;
+            background:var(--flame-bright);
+            transform:translate(-50%,-50%);
+            box-shadow:0 0 8px var(--glow-flame), 0 0 20px var(--glow-flame);
+            transition:transform 0.1s ease;
+            opacity:0;
+        }
+
+        /* ── GRID OVERLAY ── */
+        .bg-grid {
+            position:fixed; inset:0; z-index:0; pointer-events:none;
+            background-image:
+                linear-gradient(rgba(192,57,43,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(192,57,43,0.04) 1px, transparent 1px);
+            background-size:60px 60px;
+            -webkit-mask-image:radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
+            mask-image:radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
+            animation:grid-shift 40s linear infinite;
+        }
+        @keyframes grid-shift { 0%{background-position:0 0,0 0;} 100%{background-position:60px 60px,60px 60px;} }
+
+        /* ── EMBERS (kept for compat, now hidden behind aurora) ── */
+        .embers { display:none; }
         @keyframes ember-drift { 0%{transform:translate(0,0) scale(1);} 100%{transform:translate(30px,25px) scale(1.15);} }
 
         h1,h2,h3,h4,h5 { font-family:'Cormorant Garamond',serif; font-weight:700; line-height:1.15; }
@@ -295,9 +350,40 @@
         .back-top.show { opacity:1; visibility:visible; }
         .back-top:hover { transform:translateY(-4px); box-shadow:0 8px 40px var(--glow-flame); }
 
-        .reveal { opacity:0; transform:translateY(25px); transition:opacity 0.7s ease,transform 0.7s ease; }
-        .reveal.in { opacity:1; transform:translateY(0); }
-        .d1{transition-delay:0.1s;} .d2{transition-delay:0.2s;} .d3{transition-delay:0.3s;}
+        /* ── ENHANCED REVEAL ── */
+        .reveal {
+            opacity:0;
+            transform:translateY(32px) scale(0.97);
+            filter:blur(4px);
+            transition:opacity 0.8s cubic-bezier(0.22,1,0.36,1),
+                        transform 0.8s cubic-bezier(0.22,1,0.36,1),
+                        filter 0.8s ease;
+        }
+        .reveal.in {
+            opacity:1;
+            transform:translateY(0) scale(1);
+            filter:blur(0);
+        }
+        .d1{transition-delay:0.12s;} .d2{transition-delay:0.24s;} .d3{transition-delay:0.36s;}
+
+        /* ── SECTION GLOW HALOS ── */
+        .sh h2 { position:relative; display:inline-block; }
+        .sh h2::after {
+            content:'';
+            position:absolute;
+            bottom:-12px; left:50%; transform:translateX(-50%);
+            width:60%; height:1px;
+            background:linear-gradient(90deg,transparent,var(--flame-mid),var(--gold),transparent);
+            animation:line-shimmer 3s ease-in-out infinite;
+        }
+        @keyframes line-shimmer {
+            0%,100% { opacity:0.4; transform:translateX(-50%) scaleX(0.7); }
+            50% { opacity:1; transform:translateX(-50%) scaleX(1.1); }
+        }
+
+        /* ── HERO CARD PARALLAX ── */
+        .hero-visual { perspective:1200px; }
+        .hero-card { transform-style:preserve-3d; transition:transform 0.15s ease; }
 
         .sh { text-align:center; }
         .sh .pill { margin-bottom:1rem; display:inline-flex; }
@@ -338,6 +424,18 @@
 </head>
 <body>
 
+<!-- bg elements -->
+<div id="cursor-glow"></div>
+<div id="cursor-dot"></div>
+<canvas id="particle-canvas"></canvas>
+<div class="bg-grid"></div>
+<div class="aurora">
+    <div class="aurora-band ab1"></div>
+    <div class="aurora-band ab2"></div>
+    <div class="aurora-band ab3"></div>
+    <div class="aurora-band ab4"></div>
+    <div class="aurora-band ab5"></div>
+</div>
 <div class="embers"><div class="ember e1"></div><div class="ember e2"></div><div class="ember e3"></div></div>
 
 <!-- HEADER -->
@@ -345,7 +443,7 @@
     <div class="container">
         <nav>
             <a href="#" class="logo">
-                <div class="logo-img"><img src="your-logo.png" alt="Aura Fitness Logo"></div>
+                <div class="logo-img"><img src="logo.jpg" alt="Aura Fitness Logo"></div>
                 Aura Fitness
             </a>
             <div class="nav-links" id="navLinks">
@@ -514,14 +612,28 @@
                 <div class="tcard swiper-slide"><div class="stars">★★★★★</div><div class="tquote">"</div><p>Aura completely transformed my home workouts. The form corrections helped me fix my squat technique that I've been doing wrong for years!</p><div class="tauthor"><div class="tavatar">J</div><div><h4>Jyento Mukherjee</h4><span>Fitness Enthusiast</span></div></div></div>
                 <div class="tcard swiper-slide"><div class="stars">★★★★★</div><div class="tquote">"</div><p>As a personal trainer, I recommend Aura to all my clients. It's like having a trainer with you 24/7. The rep counting is incredibly accurate.</p><div class="tauthor"><div class="tavatar">A</div><div><h4>Akash Debnath</h4><span>Certified Personal Trainer</span></div></div></div>
                 <div class="tcard swiper-slide"><div class="stars">★★★★★</div><div class="tquote">"</div><p>I've struggled with consistency, but Aura keeps me motivated with real-time feedback and progress tracking. Love the sleek design too!</p><div class="tauthor"><div class="tavatar">S</div><div><h4>Surendre Das</h4><span>Working Professional</span></div></div></div>
-                <div class="tcard swiper-slide"><div class="stars">★★★★★</div><div class="tquote">"</div><p>The senior fitness program has been a game-changer. At 72, I feel stronger and more balanced than I have in years. Truly remarkable.</p><div class="tauthor"><div class="tavatar">R</div><div><h4>Rahul Gupta</h4><span>Senior User, 72</span></div></div></div>
+                <div class="tcard swiper-slide"><div class="stars">★★★★★</div><div class="tquote">"</div><p>The senior fitness program has been a game-changer. At 72, I feel stronger and more balanced than I have in years. Truly remarkable.</p><div class="tauthor"><div class="tavatar">M</div><div><h4>Margaret Williams</h4><span>Senior User, 72</span></div></div></div>
             </div>
             <div class="swiper-pagination"></div>
         </div>
     </div>
 </section>
 
-
+<!-- TEAM -->
+<section class="team-section section-padding" id="developers">
+    <div class="container">
+        <div class="sh">
+            <span class="pill">Developers</span>
+            <h2>Meet the <span class="flame-text">Creators</span></h2>
+            <p>The talented minds who built Aura from the ground up.</p>
+        </div>
+        <div class="team-grid">
+            <div class="tmcard reveal"><img src="aditya.jpg" alt="Aditya Singh" class="tm-photo" onerror="this.style.display='none'"><div class="tm-role">Frontend Developer</div><h3>Aditya Singh</h3><p>UI/UX, Responsive Design &amp; Interactive Web Interfaces</p><div class="tm-social"><a href="https://www.linkedin.com/in/aditya-singh-91136b380/" target="_blank" rel="noopener"><i class="fab fa-linkedin"></i></a></div></div>
+            <div class="tmcard reveal d1"><img src="naman.jpg" alt="Naman Kumar Tiwari" class="tm-photo" onerror="this.style.display='none'"><div class="tm-role">Backend Developer</div><h3>Naman Kumar Tiwari</h3><p>Server-side Logic, API Integration &amp; Database Management</p><div class="tm-social"><a href="https://www.linkedin.com/in/naman-kumar-tiwari-871909362/" target="_blank" rel="noopener"><i class="fab fa-linkedin"></i></a></div></div>
+            <div class="tmcard reveal d2"><img src="ayush.jpg" alt="Ayush Gupta" class="tm-photo" onerror="this.style.display='none'"><div class="tm-role">UI/UX Designer</div><h3>Ayush Gupta</h3><p>User Experience, Wireframing &amp; Interactive Prototypes</p><div class="tm-social"><a href="https://www.linkedin.com/in/ayush-gupta-85a831277/" target="_blank" rel="noopener"><i class="fab fa-linkedin"></i></a></div></div>
+        </div>
+    </div>
+</section>
 
 <!-- SOS -->
 <section class="sos-section section-padding" id="SOS">
@@ -610,26 +722,6 @@
                 <a href="pose-coach.html" class="btn-white"><i class="fas fa-bolt"></i> Start Free Trial</a>
                 <a href="#features" class="btn-glass-dark">Learn More <i class="fas fa-arrow-right"></i></a>
             </div>
-            <div class="app-badges">
-                <a href="#" class="app-badge"><i class="fab fa-apple"></i><div><small>Download on the</small><strong>App Store</strong></div></a>
-                <a href="#" class="app-badge"><i class="fab fa-google-play"></i><div><small>GET IT ON</small><strong>Google Play</strong></div></a>
-            </div>
-        </div>
-    </div>
-</section>
-    
-    <!-- TEAM -->
-<section class="team-section section-padding" id="developers">
-    <div class="container">
-        <div class="sh">
-            <span class="pill">Developers</span>
-            <h2>Meet the <span class="flame-text">Creators</span></h2>
-            <p>The talented minds who built Aura from the ground up.</p>
-        </div>
-        <div class="team-grid">
-            <div class="tmcard reveal"><img src="aditya.jpg" alt="Aditya Singh" class="tm-photo" onerror="this.style.display='none'"><div class="tm-role">Frontend Developer</div><h3>Aditya Singh</h3><p>UI/UX, Responsive Design &amp; Interactive Web Interfaces</p><div class="tm-social"><a href="https://www.linkedin.com/in/aditya-singh-91136b380/" target="_blank" rel="noopener"><i class="fab fa-linkedin"></i></a></div></div>
-            <div class="tmcard reveal d1"><img src="naman.jpg" alt="Naman Kumar Tiwari" class="tm-photo" onerror="this.style.display='none'"><div class="tm-role">Backend Developer</div><h3>Naman Kumar Tiwari</h3><p>Server-side Logic, API Integration &amp; Database Management</p><div class="tm-social"><a href="https://www.linkedin.com/in/naman-kumar-tiwari-871909362/" target="_blank" rel="noopener"><i class="fab fa-linkedin"></i></a></div></div>
-            <div class="tmcard reveal d2"><img src="ayush.jpg" alt="Ayush Gupta" class="tm-photo" onerror="this.style.display='none'"><div class="tm-role">UI/UX Designer</div><h3>Ayush Gupta</h3><p>User Experience, Wireframing &amp; Interactive Prototypes</p><div class="tm-social"><a href="https://www.linkedin.com/in/ayush-gupta-85a831277/" target="_blank" rel="noopener"><i class="fab fa-linkedin"></i></a></div></div>
         </div>
     </div>
 </section>
@@ -663,22 +755,114 @@
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
 <script>
+    /* ── Swiper ── */
     new Swiper('.swiper-testi',{slidesPerView:1,spaceBetween:20,loop:true,pagination:{el:'.swiper-pagination',clickable:true},breakpoints:{640:{slidesPerView:1},768:{slidesPerView:2},1024:{slidesPerView:3}}});
 
+    /* ── Mobile nav ── */
     const menuBtn=document.getElementById('menuBtn'),navLinks=document.getElementById('navLinks');
     menuBtn.addEventListener('click',()=>{const o=navLinks.classList.toggle('open');menuBtn.innerHTML=o?'<i class="fas fa-times"></i>':'<i class="fas fa-bars"></i>';});
     navLinks.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{navLinks.classList.remove('open');menuBtn.innerHTML='<i class="fas fa-bars"></i>';}));
 
+    /* ── Scroll header & back-to-top ── */
     const header=document.getElementById('header'),backTop=document.getElementById('backTop');
     window.addEventListener('scroll',()=>{header.classList.toggle('scrolled',window.scrollY>40);backTop.classList.toggle('show',window.scrollY>500);});
     backTop.addEventListener('click',e=>{e.preventDefault();window.scrollTo({top:0,behavior:'smooth'});});
 
+    /* ── Reveal on scroll ── */
     document.querySelectorAll('.reveal').forEach(el=>{new IntersectionObserver(entries=>{if(entries[0].isIntersecting)entries[0].target.classList.add('in');},{threshold:0.1}).observe(el);});
 
+    /* ── Video fallback ── */
     const vid=document.querySelector('.hero-video-wrap video'),fallback=document.getElementById('vidFallback');
     if(vid){vid.addEventListener('canplay',()=>{if(fallback)fallback.style.display='none';});if(vid.readyState>=3&&fallback)fallback.style.display='none';}
 
+    /* ── Service Worker ── */
     if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+
+    /* ════════════════════════════════════════════
+       CANVAS PARTICLE SYSTEM — floating embers
+    ════════════════════════════════════════════ */
+    (function(){
+        const canvas=document.getElementById('particle-canvas');
+        const ctx=canvas.getContext('2d');
+        let W,H,particles=[];
+        const COLORS=['rgba(192,57,43,','rgba(231,76,60,','rgba(243,156,18,','rgba(212,168,67,','rgba(139,26,14,'];
+        function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+        resize(); window.addEventListener('resize',resize);
+        function mkP(){
+            const r=Math.random;
+            return {
+                x:r()*W, y:r()*H,
+                vx:(r()-0.5)*0.25, vy:-(r()*0.35+0.08),
+                radius:r()*2.2+0.5,
+                alpha:r()*0.45+0.05,
+                alphaDir:r()<0.5?1:-1,
+                color:COLORS[Math.floor(r()*COLORS.length)],
+                life:0, maxLife:r()*600+300
+            };
+        }
+        const COUNT=90;
+        for(let i=0;i<COUNT;i++){const p=mkP();p.life=Math.random()*p.maxLife;particles.push(p);}
+        function draw(){
+            ctx.clearRect(0,0,W,H);
+            for(let i=particles.length-1;i>=0;i--){
+                const p=particles[i];
+                p.x+=p.vx; p.y+=p.vy;
+                p.life++;
+                p.alpha+=0.003*p.alphaDir;
+                if(p.alpha>0.5||p.alpha<0.02) p.alphaDir*=-1;
+                if(p.life>p.maxLife||p.y<-10){particles.splice(i,1);particles.push(mkP());continue;}
+                ctx.save();
+                const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.radius*4);
+                g.addColorStop(0,p.color+p.alpha+')');
+                g.addColorStop(1,p.color+'0)');
+                ctx.fillStyle=g;
+                ctx.beginPath();
+                ctx.arc(p.x,p.y,p.radius*4,0,Math.PI*2);
+                ctx.fill();
+                ctx.restore();
+            }
+            requestAnimationFrame(draw);
+        }
+        draw();
+    })();
+
+    /* ════════════════════════════════════════════
+       CURSOR GLOW
+    ════════════════════════════════════════════ */
+    (function(){
+        const glow=document.getElementById('cursor-glow');
+        const dot=document.getElementById('cursor-dot');
+        let mx=0,my=0,gx=0,gy=0;
+        window.addEventListener('mousemove',e=>{
+            mx=e.clientX; my=e.clientY;
+            dot.style.left=mx+'px'; dot.style.top=my+'px';
+            dot.style.opacity='1'; glow.style.opacity='1';
+        });
+        window.addEventListener('mouseleave',()=>{dot.style.opacity='0';glow.style.opacity='0';});
+        (function animGlow(){
+            gx+=(mx-gx)*0.06; gy+=(my-gy)*0.06;
+            glow.style.left=gx+'px'; glow.style.top=gy+'px';
+            requestAnimationFrame(animGlow);
+        })();
+    })();
+
+    /* ════════════════════════════════════════════
+       HERO CARD 3-D MOUSE PARALLAX
+    ════════════════════════════════════════════ */
+    (function(){
+        const heroVisual=document.querySelector('.hero-visual');
+        const heroCard=document.querySelector('.hero-card');
+        if(!heroVisual||!heroCard)return;
+        heroVisual.addEventListener('mousemove',e=>{
+            const rect=heroVisual.getBoundingClientRect();
+            const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+            const dx=(e.clientX-cx)/rect.width, dy=(e.clientY-cy)/rect.height;
+            heroCard.style.transform=`rotateY(${dx*10}deg) rotateX(${-dy*8}deg) translateZ(10px)`;
+        });
+        heroVisual.addEventListener('mouseleave',()=>{
+            heroCard.style.transform='rotateY(0deg) rotateX(0deg) translateZ(0)';
+        });
+    })();
 </script>
 </body>
 </html>
